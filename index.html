@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kauan att To-Do List</title>
+    <title>Kauan To-Do List</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,9 +15,9 @@
             <input type="text" id="taskInput" placeholder="Add a new task...">
             <input type="date" id="deadlineInput" placeholder="Deadline">
             <select id="categorySelect">
-                <option value="Work">Work</option>
-                <option value="Personal">Personal</option>
-                <option value="Study">Study</option>
+                <option value="Work">Group 1</option>
+                <option value="Personal">Group 2</option>
+                <option value="Study">Group 3</option>
             </select>
             <select id="prioritySelect">
                 <option value="Low">Low Priority</option>
@@ -29,15 +29,15 @@
         
         <div class="columns">
             <div class="column" id="workColumn" ondrop="drop(event)" ondragover="allowDrop(event)">
-                <h2>Work</h2>
+                <h2>Click - Group 1</h2>
                 <ul id="workTaskList"></ul>
             </div>
             <div class="column" id="personalColumn" ondrop="drop(event)" ondragover="allowDrop(event)">
-                <h2>Personal</h2>
+                <h2>Click - Group 2</h2>
                 <ul id="personalTaskList"></ul>
             </div>
             <div class="column" id="studyColumn" ondrop="drop(event)" ondragover="allowDrop(event)">
-                <h2>Study</h2>
+                <h2>Click here - Group 3</h2>
                 <ul id="studyTaskList"></ul>
             </div>
         </div>
