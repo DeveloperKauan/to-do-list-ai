@@ -136,3 +136,16 @@ li {
 .share-btn:hover {
     background-color: #45a049;
 }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .columns {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .column {
+        width: 100%;
+        max-height: none;
+    }
+}
