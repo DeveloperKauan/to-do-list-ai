@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const studyTaskList = document.getElementById('studyTaskList');
     const shareBtn = document.getElementById('shareBtn');
     const completedTasks = document.getElementById('completedTasks');
+    const themeToggle = document.getElementById('themeToggle');
 
     let taskMetrics = {
         totalTasks: 0,
@@ -116,19 +117,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Share the user's tasks
     shareBtn.addEventListener('click', function() {
-        const tasks = [];
-        [workTaskList, personalTaskList, studyTaskList].forEach(function(list) {
-            list.querySelectorAll('li').forEach(function(li) {
-                tasks.push(li.querySelector('span').textContent);
-            });
-        });
-        const taskListText = tasks.join('\n');
-        navigator.clipboard.writeText(taskListText).then(function() {
-            alert('Your task list has been copied to the clipboard!');
-        }, function() {
-            alert('Failed to copy the task list.');
-        });
+        generateShareableLink();
     });
+
+    // Generate a shareable link
+    function generateShareableLink() {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const encodedTasks = encodeURIComponent(JSON.stringify(tasks));
+        const shareableLink = `${window.location.origin}${window.location.pathname}?tasks=${encodedTasks}`;
+        navigator.clipboard.writeText(shareableLink).then(() => {
+            alert('Link para compartilhar as tarefas copiado!');
+        });
+    }
+
+    // Load tasks from a shared link
+    function loadTasksFromLink() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('tasks')) {
+            const tasks = JSON.parse(decodeURIComponent(urlParams.get('tasks')));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            location.reload();
+        }
+    }
+    loadTasksFromLink();
 
     // Update task completion metrics
     function updateMetrics() {
@@ -139,5 +150,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const completionPercentage = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
         completedTasks.textContent = `Completed: ${completionPercentage}%`;
+    }
+
+    // Toggle theme mode
+    themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    // Load previously selected theme
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
     }
 });
