@@ -5,10 +5,32 @@
     box-sizing: border-box;
 }
 
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --container-bg-color: #f0f0f0;
+    --column-bg-color: #e6e6e6;
+    --task-bg-color: #d9d9d9;
+    --completed-task-color: #888;
+    --border-color: #ccc;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --container-bg-color: #1e1e1e;
+    --column-bg-color: #2a2a2a;
+    --task-bg-color: #333;
+    --completed-task-color: #aaaaaa;
+    --border-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: white;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,16 +38,16 @@ body {
 }
 
 .container {
-    background-color: #1e1e1e;
+    background-color: var(--container-bg-color);
     padding: 20px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 15px var(--shadow-color);
     border-radius: 10px;
     width: 90%;
     text-align: center;
 }
 
 h1 {
-    color: #ffffff;
+    color: var(--text-color);
     margin-bottom: 20px;
 }
 
@@ -36,20 +58,20 @@ h1 {
 #taskInput {
     width: 100%;
     padding: 10px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
-    background-color: #333;
-    color: white;
+    background-color: var(--task-bg-color);
+    color: var(--text-color);
     margin-bottom: 10px;
 }
 
 #prioritySelect, #categorySelect, #deadlineInput {
     width: 100%;
     padding: 10px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
-    background-color: #333;
-    color: white;
+    background-color: var(--task-bg-color);
+    color: var(--text-color);
     margin-bottom: 10px;
 }
 
@@ -62,7 +84,7 @@ h1 {
 
 .column {
     flex: 1;
-    background-color: #2a2a2a;
+    background-color: var(--column-bg-color);
     padding: 10px;
     border-radius: 10px;
     height: 400px;
@@ -76,19 +98,19 @@ ul {
 
 li {
     padding: 15px;
-    background-color: #333;
+    background-color: var(--task-bg-color);
     margin-bottom: 10px;
     border-radius: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: white;
+    color: var(--text-color);
     cursor: move;
 }
 
 .completed {
     text-decoration: line-through;
-    color: #888;
+    color: var(--completed-task-color);
 }
 
 button.deleteBtn {
@@ -110,7 +132,7 @@ button.deleteBtn:hover {
 }
 
 #completedTasks {
-    color: #aaaaaa;
+    color: var(--completed-task-color);
 }
 
 .priority-low {
@@ -129,4 +151,14 @@ button.deleteBtn:hover {
     font-size: 12px;
     margin-left: 10px;
     color: #bbbbbb;
+}
+
+@media (max-width: 768px) {
+    .columns {
+        flex-direction: column;
+    }
+
+    .column {
+        height: auto;
+    }
 }
