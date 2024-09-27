@@ -1,3 +1,4 @@
+/* Reset básico */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +7,8 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
+    background-color: #121212;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -14,16 +16,17 @@ body {
 }
 
 .container {
-    background-color: white;
+    background-color: #1e1e1e;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
     width: 400px;
     text-align: center;
 }
 
 h1 {
-    color: #333;
+    color: #ffffff;
+    margin-bottom: 20px;
 }
 
 .input-section {
@@ -31,23 +34,38 @@ h1 {
 }
 
 #taskInput {
-    width: 70%;
+    width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    margin-bottom: 10px;
 }
 
-#addTaskBtn {
+#prioritySelect, #deadlineInput {
+    width: 100%;
     padding: 10px;
-    background-color: #28a745;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
 }
 
-#addTaskBtn:hover {
-    background-color: #218838;
+button:hover {
+    background-color: #0056b3;
 }
 
 ul {
@@ -56,24 +74,26 @@ ul {
 }
 
 li {
-    padding: 10px;
-    background-color: #f0f0f0;
+    padding: 15px;
+    background-color: #2a2a2a;
     margin-bottom: 10px;
-    border-radius: 4px;
+    border-radius: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: white;
 }
 
 .completed {
     text-decoration: line-through;
+    color: #888;
 }
 
 button.deleteBtn {
     background-color: #dc3545;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
 }
@@ -82,20 +102,14 @@ button.deleteBtn:hover {
     background-color: #c82333;
 }
 
-#shareBtn {
+.metrics {
     margin-top: 20px;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    text-align: left;
 }
 
-#shareBtn:hover {
-    background-color: #0056b3;
+#completedTasks {
+    color: #aaaaaa;
 }
-/* Estilo permanece o mesmo, apenas adicionando algumas regras novas */
 
 .priority-low {
     color: green;
@@ -112,5 +126,5 @@ button.deleteBtn:hover {
 .deadline {
     font-size: 12px;
     margin-left: 10px;
-    color: #888;
+    color: #bbbbbb;
 }
