@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const categorySelect = document.getElementById('categorySelect');
     const prioritySelect = document.getElementById('prioritySelect');
     const deadlineInput = document.getElementById('deadlineInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
     const workTaskList = document.getElementById('workTaskList');
     const personalTaskList = document.getElementById('personalTaskList');
     const studyTaskList = document.getElementById('studyTaskList');
@@ -15,17 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
         completedTasks: 0,
     };
 
-    // Add task on Enter keypress
-    taskInput.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            addTask();
-        }
-    });
-
-    // Load tasks from localStorage
+    addTaskBtn.addEventListener('click', addTask);
     loadTasks();
 
-    // Add a new task
     function addTask() {
         const taskText = taskInput.value.trim();
         const category = categorySelect.value;
@@ -47,57 +40,64 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Add task to the DOM based on category
     function addTaskToDOM(task) {
         const li = document.createElement('li');
         li.setAttribute('draggable', true);
+        
         li.innerHTML = `
-            <span>${task.text}</span>
+            <input type="text" value="${task.text}" readonly />
             <span class="deadline">${task.deadline ? `(Due: ${task.deadline})` : ''}</span>
             <span class="priority-${task.priority.toLowerCase()}">${task.priority}</span>
+            <button class="editBtn">Edit</button>
             <button class="deleteBtn">Delete</button>
         `;
 
-        // Mark task as complete
-        li.addEventListener('click', function() {
-            li.classList.toggle('completed');
-            updateMetrics();
-            saveTasks();
+        const editBtn = li.querySelector('.editBtn');
+        const deleteBtn = li.querySelector('.deleteBtn');
+        const input = li.querySelector('input');
+
+        editBtn.addEventListener('click', function() {
+            if (input.readOnly) {
+                input.readOnly = false;
+                input.focus();
+                editBtn.textContent = 'Save';
+            } else {
+                input.readOnly = true;
+                task.text = input.value;
+                editBtn.textContent = 'Edit';
+                saveTasks();
+            }
         });
 
-        // Delete task
-        li.querySelector('.deleteBtn').addEventListener('click', function(e) {
+        deleteBtn.addEventListener('click', function(e) {
             e.stopPropagation();
             li.remove();
             updateMetrics();
             saveTasks();
         });
 
-        // Determine the correct category column
-        if (task.category === 'Work') {
-            workTaskList.appendChild(li);
-        } else if (task.category === 'Personal') {
-            personalTaskList.appendChild(li);
-        } else if (task.category === 'Study') {
-            studyTaskList.appendChild(li);
-        }
+        input.addEventListener('change', saveTasks);
+        input.addEventListener('click', (e) => e.stopPropagation());
+
+        if (task.category === 'Work') workTaskList.appendChild(li);
+        else if (task.category === 'Personal') personalTaskList.appendChild(li);
+        else if (task.category === 'Study') studyTaskList.appendChild(li);
 
         updateMetrics();
     }
 
-    // Save tasks to localStorage
     function saveTasks() {
         const tasks = [];
-        [workTaskList, personalTaskList, studyTaskList].forEach(function(list) {
-            list.querySelectorAll('li').forEach(function(li) {
-                const taskText = li.querySelector('span').textContent;
+        [workTaskList, personalTaskList, studyTaskList].forEach(list => {
+            list.querySelectorAll('li').forEach(li => {
+                const input = li.querySelector('input').value;
                 const priority = li.querySelector('span.priority-low') || li.querySelector('span.priority-medium') || li.querySelector('span.priority-high');
                 const deadline = li.querySelector('.deadline') ? li.querySelector('.deadline').textContent : '';
                 const completed = li.classList.contains('completed');
                 tasks.push({
-                    text: taskText,
+                    text: input,
                     priority: priority.textContent,
-                    deadline: deadline ? deadline.replace('(Due: ', '').replace(')', '') : '',
+                    deadline: deadline.replace('(Due: ', '').replace(')', ''),
                     category: list.id.includes('work') ? 'Work' : list.id.includes('personal') ? 'Personal' : 'Study',
                     completed: completed
                 });
@@ -106,21 +106,16 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    // Load tasks from localStorage
     function loadTasks() {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        tasks.forEach(function(task) {
-            addTaskToDOM(task);
-        });
+        tasks.forEach(task => addTaskToDOM(task));
         updateMetrics();
     }
 
-    // Share the user's tasks
     shareBtn.addEventListener('click', function() {
         generateShareableLink();
     });
 
-    // Generate a shareable link
     function generateShareableLink() {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const encodedTasks = encodeURIComponent(JSON.stringify(tasks));
@@ -130,36 +125,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Load tasks from a shared link
     function loadTasksFromLink() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('tasks')) {
             const tasks = JSON.parse(decodeURIComponent(urlParams.get('tasks')));
             localStorage.setItem('tasks', JSON.stringify(tasks));
+            window.history.replaceState(null, null, window.location.pathname);
             location.reload();
         }
     }
     loadTasksFromLink();
 
-    // Update task completion metrics
-    function updateMetrics() {
-        const totalTasks = [...workTaskList.children, ...personalTaskList.children, ...studyTaskList.children].length;
-        const completedTasksCount = [...workTaskList.children, ...personalTaskList.children, ...studyTaskList.children].filter(li => li.classList.contains('completed')).length;
-        taskMetrics.totalTasks = totalTasks;
-        taskMetrics.completedTasks = completedTasksCount;
-
-        const completionPercentage = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
-        completedTasks.textContent = `Completed: ${completionPercentage}%`;
-    }
-
-    // Toggle theme mode
     themeToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        const isDark = document.body.classList.toggle('dark-mode');
+        themeToggle.textContent = isDark ? '🌜' : '🌞';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 
-    // Load previously selected theme
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
+        themeToggle.textContent = '🌜';
     }
 });
