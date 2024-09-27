@@ -11,11 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const completedTasks = document.getElementById('completedTasks');
     const themeToggle = document.getElementById('themeToggle');
 
-    let taskMetrics = {
-        totalTasks: 0,
-        completedTasks: 0,
-    };
-
     addTaskBtn.addEventListener('click', addTask);
     loadTasks();
 
@@ -45,39 +40,28 @@ document.addEventListener('DOMContentLoaded', function() {
         li.setAttribute('draggable', true);
         
         li.innerHTML = `
-            <input type="text" value="${task.text}" readonly />
+            <input type="checkbox" ${task.completed ? 'checked' : ''} class="complete-checkbox" />
+            <span contenteditable="false" class="task-text">${task.text}</span>
             <span class="deadline">${task.deadline ? `(Due: ${task.deadline})` : ''}</span>
             <span class="priority-${task.priority.toLowerCase()}">${task.priority}</span>
-            <button class="editBtn">Edit</button>
             <button class="deleteBtn">Delete</button>
         `;
 
-        const editBtn = li.querySelector('.editBtn');
-        const deleteBtn = li.querySelector('.deleteBtn');
-        const input = li.querySelector('input');
-
-        editBtn.addEventListener('click', function() {
-            if (input.readOnly) {
-                input.readOnly = false;
-                input.focus();
-                editBtn.textContent = 'Save';
-            } else {
-                input.readOnly = true;
-                task.text = input.value;
-                editBtn.textContent = 'Edit';
-                saveTasks();
-            }
+        li.addEventListener('dragstart', (event) => {
+            event.dataTransfer.setData('text/plain', JSON.stringify(task));
         });
 
-        deleteBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
+        li.querySelector('.complete-checkbox').addEventListener('change', function() {
+            task.completed = this.checked;
+            saveTasks();
+            updateMetrics();
+        });
+
+        li.querySelector('.deleteBtn').addEventListener('click', () => {
             li.remove();
             updateMetrics();
             saveTasks();
         });
-
-        input.addEventListener('change', saveTasks);
-        input.addEventListener('click', (e) => e.stopPropagation());
 
         if (task.category === 'Work') workTaskList.appendChild(li);
         else if (task.category === 'Personal') personalTaskList.appendChild(li);
@@ -90,17 +74,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const tasks = [];
         [workTaskList, personalTaskList, studyTaskList].forEach(list => {
             list.querySelectorAll('li').forEach(li => {
-                const input = li.querySelector('input').value;
-                const priority = li.querySelector('span.priority-low') || li.querySelector('span.priority-medium') || li.querySelector('span.priority-high');
-                const deadline = li.querySelector('.deadline') ? li.querySelector('.deadline').textContent : '';
-                const completed = li.classList.contains('completed');
-                tasks.push({
-                    text: input,
-                    priority: priority.textContent,
-                    deadline: deadline.replace('(Due: ', '').replace(')', ''),
-                    category: list.id.includes('work') ? 'Work' : list.id.includes('personal') ? 'Personal' : 'Study',
-                    completed: completed
-                });
+                const input = li.querySelector('.task-text').textContent;
+                const completed = li.querySelector('.complete-checkbox').checked;
+                const category = list.id.includes('work') ? 'Work' : list.id.includes('personal') ? 'Personal' : 'Study';
+                const priority = li.querySelector('span[class^=priority]').textContent;
+                const deadline = li.querySelector('.deadline').textContent.replace('(Due: ', '').replace(')', '');
+
+                tasks.push({ text: input, completed, category, priority, deadline });
             });
         });
         localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -112,38 +92,29 @@ document.addEventListener('DOMContentLoaded', function() {
         updateMetrics();
     }
 
-    shareBtn.addEventListener('click', function() {
-        generateShareableLink();
-    });
-
-    function generateShareableLink() {
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const encodedTasks = encodeURIComponent(JSON.stringify(tasks));
-        const shareableLink = `${window.location.origin}${window.location.pathname}?tasks=${encodedTasks}`;
-        navigator.clipboard.writeText(shareableLink).then(() => {
-            alert('Link para compartilhar as tarefas copiado!');
-        });
+    function updateMetrics() {
+        const totalTasks = [...document.querySelectorAll('li')].length;
+        const completedTasks = [...document.querySelectorAll('.complete-checkbox:checked')].length;
+        completedTasks.textContent = `Completed: ${((completedTasks / totalTasks) * 100).toFixed(2)}%`;
     }
 
-    function loadTasksFromLink() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('tasks')) {
-            const tasks = JSON.parse(decodeURIComponent(urlParams.get('tasks')));
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            window.history.replaceState(null, null, window.location.pathname);
-            location.reload();
-        }
-    }
-    loadTasksFromLink();
-
-    themeToggle.addEventListener('click', function() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        themeToggle.textContent = isDark ? '🌜' : '🌞';
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        themeToggle.textContent = document.body.classList.contains('dark-mode') ? '🌜' : '🌞';
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     });
 
     if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         themeToggle.textContent = '🌜';
     }
+
+    // Funções de arrastar e soltar
+    window.allowDrop = (ev) => ev.preventDefault();
+    window.drop = (ev) => {
+        ev.preventDefault();
+        const data = JSON.parse(ev.dataTransfer.getData("text"));
+        addTaskToDOM(data);
+        saveTasks();
+    };
 });
