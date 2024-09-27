@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (taskText !== '') {
             const task = {
+                id: Date.now(),
                 text: taskText,
                 category: category,
                 priority: priority,
@@ -37,18 +38,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addTaskToDOM(task) {
         const li = document.createElement('li');
+        li.setAttribute('data-id', task.id);
         li.setAttribute('draggable', true);
-        
+
         li.innerHTML = `
             <input type="checkbox" ${task.completed ? 'checked' : ''} class="complete-checkbox" />
-            <span contenteditable="false" class="task-text">${task.text}</span>
+            <span contenteditable="true" class="task-text">${task.text}</span>
             <span class="deadline">${task.deadline ? `(Due: ${task.deadline})` : ''}</span>
             <span class="priority-${task.priority.toLowerCase()}">${task.priority}</span>
             <button class="deleteBtn">Delete</button>
         `;
 
         li.addEventListener('dragstart', (event) => {
-            event.dataTransfer.setData('text/plain', JSON.stringify(task));
+            event.dataTransfer.setData('text', JSON.stringify(task));
         });
 
         li.querySelector('.complete-checkbox').addEventListener('change', function() {
@@ -95,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateMetrics() {
         const totalTasks = [...document.querySelectorAll('li')].length;
         const completedTasks = [...document.querySelectorAll('.complete-checkbox:checked')].length;
-        completedTasks.textContent = `Completed: ${((completedTasks / totalTasks) * 100).toFixed(2)}%`;
+        document.getElementById('completedTasks').textContent = `Completed: ${((completedTasks / totalTasks) * 100).toFixed(2)}%`;
     }
 
     themeToggle.addEventListener('click', () => {
@@ -114,7 +116,25 @@ document.addEventListener('DOMContentLoaded', function() {
     window.drop = (ev) => {
         ev.preventDefault();
         const data = JSON.parse(ev.dataTransfer.getData("text"));
-        addTaskToDOM(data);
+        ev.target.appendChild(document.querySelector(`li[data-id="${data.id}"]`));
         saveTasks();
     };
+
+    // Compartilhar tarefas
+    shareBtn.addEventListener('click', () => {
+        const tasks = localStorage.getItem('tasks');
+        const url = new URL(window.location.href);
+        url.searchParams.set('sharedTasks', tasks);
+        navigator.clipboard.writeText(url.toString()).then(() => {
+            alert('Link copiado! Compartilhe com seus amigos.');
+        });
+    });
+
+    // Renomear grupos ao clicar no título
+    document.querySelectorAll('.column h2').forEach(h2 => {
+        h2.setAttribute('contenteditable', true);
+        h2.addEventListener('blur', () => {
+            saveTasks();
+        });
+    });
 });
