@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     const taskInput = document.getElementById('taskInput');
-    const categorySelect = document.getElementById('categorySelect');
     const prioritySelect = document.getElementById('prioritySelect');
     const deadlineInput = document.getElementById('deadlineInput');
-    const workTaskList = document.getElementById('workTaskList');
-    const personalTaskList = document.getElementById('personalTaskList');
-    const studyTaskList = document.getElementById('studyTaskList');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const groupInput = document.getElementById('groupInput');
+    const addGroupBtn = document.getElementById('addGroupBtn');
+    const groupsContainer = document.getElementById('groupsContainer');
     const shareBtn = document.getElementById('shareBtn');
     const completedTasks = document.getElementById('completedTasks');
 
@@ -14,57 +14,60 @@ document.addEventListener('DOMContentLoaded', function() {
         completedTasks: 0,
     };
 
-    // Add task on Enter keypress
+    // Adicionar tarefa com botão ou Enter
     taskInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
             addTask();
         }
     });
+    addTaskBtn.addEventListener('click', addTask);
 
-    // Load tasks from localStorage
+    // Adicionar grupo personalizado
+    addGroupBtn.addEventListener('click', addGroup);
+
+    // Carregar tarefas salvas no localStorage
     loadTasks();
 
-    // Add a new task
+    // Adicionar nova tarefa
     function addTask() {
         const taskText = taskInput.value.trim();
-        const category = categorySelect.value;
         const priority = prioritySelect.value;
         const deadline = deadlineInput.value;
+        const group = groupsContainer.querySelector('.column'); // Adiciona ao primeiro grupo se houver
 
-        if (taskText !== '') {
+        if (taskText !== '' && group) {
             const task = {
                 text: taskText,
-                category: category,
                 priority: priority,
                 deadline: deadline,
                 completed: false,
+                groupId: group.id,
             };
-            addTaskToDOM(task);
+            addTaskToDOM(task, group);
             saveTasks();
             taskInput.value = '';
             deadlineInput.value = '';
         }
     }
 
-    // Add task to the DOM based on category
-    function addTaskToDOM(task) {
+    // Adicionar tarefa ao DOM
+    function addTaskToDOM(task, groupElement) {
         const li = document.createElement('li');
         li.setAttribute('draggable', true);
         li.innerHTML = `
             <span>${task.text}</span>
-            <span class="deadline">${task.deadline ? `(Due: ${task.deadline})` : ''}</span>
             <span class="priority-${task.priority.toLowerCase()}">${task.priority}</span>
             <button class="deleteBtn">Delete</button>
         `;
 
-        // Mark task as complete
+        // Marcar tarefa como completa
         li.addEventListener('click', function() {
             li.classList.toggle('completed');
             updateMetrics();
             saveTasks();
         });
 
-        // Delete task
+        // Deletar tarefa
         li.querySelector('.deleteBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             li.remove();
@@ -72,53 +75,96 @@ document.addEventListener('DOMContentLoaded', function() {
             saveTasks();
         });
 
-        // Determine the correct category column
-        if (task.category === 'Work') {
-            workTaskList.appendChild(li);
-        } else if (task.category === 'Personal') {
-            personalTaskList.appendChild(li);
-        } else if (task.category === 'Study') {
-            studyTaskList.appendChild(li);
-        }
+        // Adicionar funcionalidade de arrastar e soltar
+        li.addEventListener('dragstart', handleDragStart);
+        li.addEventListener('dragend', handleDragEnd);
 
+        groupElement.querySelector('ul').appendChild(li);
         updateMetrics();
     }
 
-    // Save tasks to localStorage
+    // Criar novo grupo
+    function addGroup() {
+        const groupName = groupInput.value.trim();
+        if (groupName !== '') {
+            const groupId = `group-${Date.now()}`;
+            const column = document.createElement('div');
+            column.classList.add('column');
+            column.id = groupId;
+            column.innerHTML = `
+                <h2>${groupName}</h2>
+                <ul></ul>
+            `;
+
+            // Adicionar eventos de drag-and-drop nas colunas
+            column.addEventListener('dragover', handleDragOver);
+            column.addEventListener('drop', handleDrop);
+
+            groupsContainer.appendChild(column);
+            groupInput.value = '';
+        }
+    }
+
+    // Funcionalidades de arrastar e soltar
+    let draggedTask = null;
+
+    function handleDragStart() {
+        draggedTask = this;
+        setTimeout(() => this.style.display = 'none', 0);
+    }
+
+    function handleDragEnd() {
+        draggedTask.style.display = 'block';
+        draggedTask = null;
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    function handleDrop() {
+        this.querySelector('ul').appendChild(draggedTask);
+        saveTasks();
+    }
+
+    // Salvar tarefas no localStorage
     function saveTasks() {
         const tasks = [];
-        [workTaskList, personalTaskList, studyTaskList].forEach(function(list) {
-            list.querySelectorAll('li').forEach(function(li) {
+        groupsContainer.querySelectorAll('.column').forEach(function(column) {
+            const groupId = column.id;
+            column.querySelectorAll('li').forEach(function(li) {
                 const taskText = li.querySelector('span').textContent;
-                const priority = li.querySelector('span.priority-low') || li.querySelector('span.priority-medium') || li.querySelector('span.priority-high');
-                const deadline = li.querySelector('.deadline') ? li.querySelector('.deadline').textContent : '';
+                const priority = li.querySelector('span.priority').textContent;
                 const completed = li.classList.contains('completed');
-                tasks.push({
+                const task = {
                     text: taskText,
-                    priority: priority.textContent,
-                    deadline: deadline ? deadline.replace('(Due: ', '').replace(')', '') : '',
-                    category: list.id.includes('work') ? 'Work' : list.id.includes('personal') ? 'Personal' : 'Study',
-                    completed: completed
-                });
+                    priority: priority,
+                    completed: completed,
+                    groupId: groupId,
+                };
+                tasks.push(task);
             });
         });
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    // Load tasks from localStorage
+    // Carregar tarefas do localStorage
     function loadTasks() {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         tasks.forEach(function(task) {
-            addTaskToDOM(task);
+            const groupElement = document.getElementById(task.groupId);
+            if (groupElement) {
+                addTaskToDOM(task, groupElement);
+            }
         });
         updateMetrics();
     }
 
-    // Share the user's tasks
+    // Compartilhar a lista de tarefas
     shareBtn.addEventListener('click', function() {
         const tasks = [];
-        [workTaskList, personalTaskList, studyTaskList].forEach(function(list) {
-            list.querySelectorAll('li').forEach(function(li) {
+        groupsContainer.querySelectorAll('.column').forEach(function(column) {
+            column.querySelectorAll('li').forEach(function(li) {
                 tasks.push(li.querySelector('span').textContent);
             });
         });
@@ -130,10 +176,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Update task completion metrics
+    // Atualizar métricas de conclusão de tarefas
     function updateMetrics() {
-        const totalTasks = [...workTaskList.children, ...personalTaskList.children, ...studyTaskList.children].length;
-        const completedTasksCount = [...workTaskList.children, ...personalTaskList.children, ...studyTaskList.children].filter(li => li.classList.contains('completed')).length;
+        const totalTasks = [...groupsContainer.querySelectorAll('li')].length;
+        const completedTasksCount = [...groupsContainer.querySelectorAll('li.completed')].length;
         taskMetrics.totalTasks = totalTasks;
         taskMetrics.completedTasks = completedTasksCount;
 
