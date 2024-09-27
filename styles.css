@@ -45,6 +45,23 @@ body.dark-mode {
     max-width: 900px;
     box-shadow: 0 0 15px var(--shadow-color);
     text-align: center;
+    position: relative;
+}
+
+.theme-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.3s;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
 }
 
 .input-section {
@@ -96,23 +113,12 @@ li {
     justify-content: space-between;
     align-items: center;
     gap: 5px;
-}
-
-li input {
-    width: 70%;
+    cursor: grab;
 }
 
 .completed {
     text-decoration: line-through;
     color: var(--completed-task-color);
-}
-
-/* Botão de tema */
-.theme-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
 }
 
 .share-btn {
@@ -124,6 +130,7 @@ li input {
     cursor: pointer;
     font-size: 16px;
     margin-top: 10px;
+    transition: background-color 0.3s;
 }
 
 .share-btn:hover {
