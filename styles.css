@@ -95,3 +95,22 @@ button.deleteBtn:hover {
 #shareBtn:hover {
     background-color: #0056b3;
 }
+/* Estilo permanece o mesmo, apenas adicionando algumas regras novas */
+
+.priority-low {
+    color: green;
+}
+
+.priority-medium {
+    color: orange;
+}
+
+.priority-high {
+    color: red;
+}
+
+.deadline {
+    font-size: 12px;
+    margin-left: 10px;
+    color: #888;
+}
