@@ -1,69 +1,56 @@
 /* Reset básico */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-:root {
-    --bg-color: #ffffff;
-    --text-color: #000000;
-    --container-bg-color: #f0f0f0;
-    --column-bg-color: #e6e6e6;
-    --task-bg-color: #d9d9d9;
-    --completed-task-color: #888;
-    --border-color: #ccc;
-    --shadow-color: rgba(0, 0, 0, 0.2);
-}
-
-body.dark-mode {
-    --bg-color: #121212;
-    --text-color: #ffffff;
-    --container-bg-color: #1e1e1e;
-    --column-bg-color: #2a2a2a;
-    --task-bg-color: #333;
-    --completed-task-color: #aaaaaa;
-    --border-color: #333;
-    --shadow-color: rgba(0, 0, 0, 0.5);
-}
-
-.container {
-    background-color: var(--container-bg-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    transition: all 0.3s ease;
     padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 900px;
-    box-shadow: 0 0 15px var(--shadow-color);
-    text-align: center;
-    position: relative;
 }
 
+/* Tema claro */
+:root {
+    --background: #f4f4f4;
+    --text: #333;
+    --column-bg: #fff;
+    --button-bg: #007BFF;
+    --button-text: #fff;
+}
+
+/* Tema escuro (pode ser alternado por JavaScript) */
+body.dark-mode {
+    --background: #121212;
+    --text: #f0f0f0;
+    --column-bg: #1e1e1e;
+    --button-bg: #444;
+}
+
+/* Container geral */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Botão de tema */
 .theme-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
+    top: 20px;
+    right: 20px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     border: none;
-    font-size: 24px;
+    padding: 8px 12px;
+    border-radius: 5px;
     cursor: pointer;
-    padding: 5px;
-    transition: transform 0.3s;
 }
 
-.theme-btn:hover {
-    transform: scale(1.1);
-}
-
+/* Seção de inputs */
 .input-section {
     display: flex;
     flex-wrap: wrap;
@@ -71,81 +58,74 @@ body.dark-mode {
     margin-bottom: 20px;
 }
 
-#taskInput, #deadlineInput, #categorySelect, #prioritySelect, #addTaskBtn {
+.input-section input,
+.input-section select {
     padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 180px;
 }
 
 #addTaskBtn {
-    background-color: #007bff;
-    color: #fff;
+    padding: 10px 20px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
 }
 
-#addTaskBtn:hover {
-    background-color: #0056b3;
-}
-
+/* Colunas de tarefas */
 .columns {
     display: flex;
-    flex-wrap: wrap;
     gap: 20px;
-    margin-top: 20px;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .column {
     flex: 1;
-    min-width: 200px;
-    background-color: var(--column-bg-color);
-    padding: 10px;
-    border-radius: 10px;
-    max-height: 300px;
-    overflow-y: auto;
+    min-width: 280px;
+    background-color: var(--column-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-li {
-    background-color: var(--task-bg-color);
-    padding: 10px;
-    margin-bottom: 5px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 5px;
-    cursor: grab;
+.column h2 {
+    margin-bottom: 10px;
 }
 
-.completed {
-    text-decoration: line-through;
-    color: var(--completed-task-color);
+.column ul {
+    list-style: none;
+}
+
+/* Métricas e botão de compartilhar */
+.metrics {
+    margin-top: 20px;
+    font-weight: bold;
 }
 
 .share-btn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
+    margin-top: 10px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     padding: 10px 20px;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    transition: background-color 0.3s;
-}
-
-.share-btn:hover {
-    background-color: #45a049;
 }
 
 /* Responsividade */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
     .columns {
         flex-direction: column;
-        gap: 10px;
     }
 
-    .column {
-        width: 100%;
-        max-height: none;
+    .theme-btn {
+        position: static;
+        margin-left: auto;
+        display: block;
     }
 }
