@@ -149,3 +149,25 @@ li {
         max-height: none;
     }
 }
+/* Estilização da badge do LinkedIn */
+.badge-base {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Responsividade específica para LinkedIn badge */
+@media (max-width: 768px) {
+    .badge-base {
+        transform: scale(0.85);
+        transform-origin: top center;
+    }
+}
+
+@media (max-width: 480px) {
+    .badge-base {
+        transform: scale(0.75);
+    }
+}
